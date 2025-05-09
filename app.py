@@ -57,5 +57,5 @@ if st.button("🔄 Generate"):
 
     col1.metric("🇺🇸 Fed Funds Upper", f"{fred_latest('DFEDTARU'):.2f} %")
     col2.metric("🇺🇸 미국 2년물 금리", f"{fred_latest('DGS2'):.2f} %")
-    col3.metric("🇰🇷 BOK 기준금리", f"{ecos_latest('722Y001'):.2f} %")
+    col3.metric("🇰🇷 BOK 기준금리", f"{ecos_latest('722Y002'):.2f} %")
     col4.metric("💱 달러지수 (DXY)", f"{fred_latest('DTWEXBGS'):.2f}")
