@@ -38,7 +38,10 @@ if st.button("🔄 Generate"):
     col4.metric("💱 DXY 달러지수", f"{fred_latest('DTWEXBGS'):.2f}")
     col5.metric("📉 CBOE VIX 지수", f"{fred_latest('VIXCLS'):.2f}")
 
-    # 👇 텍스트가 잘리지 않도록 metric + markdown 분리
+    # 🌏 외국인 순매수 표시 - markdown으로 출력
     netbuy = get_foreign_netbuy_dummy()
-    col6.metric("🌏 외국인 순매수 (억 원)", "")
-    col6.markdown(f"**KOSPI:** `{netbuy['KOSPI']}`&nbsp;&nbsp;&nbsp;&nbsp;**KOSDAQ:** `{netbuy['KOSDAQ']}`")
+    col6.markdown("### 🌏 외국인 순매수 (억 원)")
+    col6.markdown(f"""
+- **KOSPI**: `{netbuy['KOSPI']}`  
+- **KOSDAQ**: `{netbuy['KOSDAQ']}`
+""")
