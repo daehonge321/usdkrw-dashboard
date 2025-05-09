@@ -23,6 +23,14 @@ def get_foreign_netbuy_dummy():
         "KOSDAQ": 731.0
     }
 
+# 📰 Google 스프레드시트 뉴스 불러오기
+@st.cache_data(ttl=600)
+def load_news():
+    SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1U751_0j_6D35wTY_Tj8roCppRCne2ubmo1jM1bmWE6Y/export?format=csv"
+    df = pd.read_csv(SHEET_CSV_URL, usecols=[0, 4, 6], nrows=10)
+    df.columns = ["제목", "요약", "본문"]
+    return df
+
 # 🖥️ 앱 레이아웃 설정
 st.set_page_config(page_title="환율 매크로 대시보드", layout="wide")
 st.title("📊 환율 관련 실시간 매크로 대시보드")
@@ -38,10 +46,26 @@ if st.button("🔄 Generate"):
     col4.metric("💱 DXY 달러지수", f"{fred_latest('DTWEXBGS'):.2f}")
     col5.metric("📉 CBOE VIX 지수", f"{fred_latest('VIXCLS'):.2f}")
 
-    # 🌏 외국인 순매수 표시 - markdown으로 출력
     netbuy = get_foreign_netbuy_dummy()
     col6.markdown("### 🌏 외국인 순매수 (억 원)")
     col6.markdown(f"""
 - **KOSPI**: `{netbuy['KOSPI']}`  
 - **KOSDAQ**: `{netbuy['KOSDAQ']}`
 """)
+
+    # 📰 뉴스 섹션
+    st.markdown("---")
+    st.markdown("## 📰 최신 환율 관련 뉴스")
+    news_df = load_news()
+    for idx, row in news_df.iterrows():
+        st.markdown(f"""
+        ### {row['제목']}
+        - {row['요약']}
+
+        <details>
+        <summary>본문 열기</summary>
+
+        {row['본문']}
+
+        </details>
+        """)
