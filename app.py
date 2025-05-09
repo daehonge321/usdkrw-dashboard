@@ -1,4 +1,3 @@
-%%writefile app.py
 import streamlit as st, requests, pandas as pd, datetime as dt
 
 FRED_KEY = "53718f3eaba1c258d6c6ae8836cf6911"
