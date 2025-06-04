@@ -18,20 +18,26 @@ def fred_timeseries(series_id, years):
         f"&observation_start={start_date.strftime('%Y-%m-%d')}"
         f"&observation_end={end_date.strftime('%Y-%m-%d')}"
     )
-    data = requests.get(url).json()["observations"]
+    response = requests.get(url)
+    response.raise_for_status()
+    data = response.json().get("observations", [])
     df = pd.DataFrame(data)
+    if df.empty:
+        return pd.DataFrame(columns=["date", "value"])
     df["date"] = pd.to_datetime(df["date"])
     df["value"] = pd.to_numeric(df["value"], errors="coerce")
-    return df
+    return df.dropna()
 
 # 📊 Altair 차트 생성 함수
 def plot_chart(df, title, y_min=None):
+    if df.empty:
+        return alt.Chart(pd.DataFrame({"date": [], "value": []})).mark_line().properties(title=title)
     chart = (
         alt.Chart(df)
         .mark_line()
         .encode(
             x="date:T",
-            y=alt.Y("value:Q", scale=alt.Scale(domainMin=y_min) if y_min else alt.Undefined),
+            y=alt.Y("value:Q", scale=alt.Scale(domainMin=y_min) if y_min is not None else alt.Undefined),
             tooltip=["date:T", "value:Q"]
         )
         .properties(title=title, width=500, height=250)
@@ -39,13 +45,13 @@ def plot_chart(df, title, y_min=None):
     )
     return chart
 
-# 🖥️ 앱 레이아웃 설정
-st.set_page_config(page_title="환율 매크로 대시보드", layout="wide")
-st.title("📊 환율 관련 실시간 매크로 대시보드")
+# 💝 앱 레이아웃 설정
+st.set_page_config(page_title="확율 매크로 데시보드", layout="wide")
+st.title("📊 확율 관련 실시간 매크로 데시보드")
 
-# 🔘 유저 버튼
+# 🔘 시간열 차트 사용
 if st.button("🔄 Generate"):
-    # 📉 시계열 차트 섹션
+    # 📉 원/달러 관련
     st.subheader("📈 주요 매크로 지표 시계열 (원/달러 관련)")
 
     col1, col2 = st.columns(2)
@@ -71,7 +77,7 @@ if st.button("🔄 Generate"):
         df_vix = fred_timeseries("VIXCLS", 1)
         st.altair_chart(plot_chart(df_vix, "CBOE VIX Index"))
 
-    # 💶 원/유로 관련 시계열 추가
+    # 💶 원/유로 관련
     st.subheader("📈 주요 매크로 지표 시계열 (원/유로 관련)")
 
     col3, col4 = st.columns(2)
