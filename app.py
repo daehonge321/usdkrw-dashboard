@@ -41,7 +41,7 @@ def plot_chart(df, title, y_min=None):
     return chart
 
 # 💅️ 앱 레이아웃 설정
-st.set_page_config(page_title="확율 매크로 대시보드", layout="wide")
+st.set_page_config(page_title="환율 매크로 대시보드", layout="wide")
 st.title("📊 확율 관련 실시간 매크로 대시보드")
 
 # 🔘 유저 버튼
