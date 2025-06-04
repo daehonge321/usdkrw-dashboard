@@ -82,10 +82,6 @@ if st.button("🔄 Generate"):
 
     col3, col4 = st.columns(2)
     with col3:
-        st.markdown("#### 🇰🇷 한국 기준금리")
-        df_kr_base = fred_timeseries("IRKRBRT01STM156N", 3)
-        st.altair_chart(plot_chart(df_kr_base, "Korea Base Rate"))
-
         st.markdown("#### 🇰🇷 한국 CPI")
         df_kr_cpi = fred_timeseries("IRKRCPICQINMEI", 3)
         st.altair_chart(plot_chart(df_kr_cpi, "Korea CPI"))
