@@ -99,9 +99,10 @@ if st.button("🔄 Generate"):
 
     col3, col4 = st.columns(2)
     with col3:
-        df_kr_cpi = fred_timeseries("CPIKRNSINM086N", 3)
+        # 한국 CPI를 YoY 비율로 대체 (IRCPBKRQINMEI)
+        df_kr_cpi = fred_timeseries("IRCPBKRQINMEI", 3)
         latest = df_kr_cpi["value"].iloc[-1] if not df_kr_cpi.empty else None
-        st.markdown(f"#### 🇰🇷 한국 CPI (% YoY): {latest:.1f}" if latest else "#### 🇰🇷 한국 CPI (% YoY)")
+        st.markdown(f"#### 🇰🇷 한국 CPI (% YoY): {latest:.1f}%" if latest else "#### 🇰🇷 한국 CPI (% YoY)")
         st.altair_chart(plot_chart(df_kr_cpi, "Korea CPI YoY", y_min=0, y_max=10))
 
     with col4:
