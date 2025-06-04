@@ -7,7 +7,7 @@ import altair as alt
 # 🔑 FRED API 키
 FRED_KEY = "53718f3eaba1c258d6c6ae8836cf6911"
 
-# 📈 FRED 시계열 데이터 가져오기 (예외 처리 포함)
+# 📈 FRED 시계열 데이터 가져오기 (예외 처리 추가)
 @st.cache_data(ttl=3600)
 def fred_timeseries(series_id, years):
     end_date = datetime.today()
@@ -33,7 +33,7 @@ def fred_timeseries(series_id, years):
         return pd.DataFrame(columns=["date", "value"])
 
 # 📊 Altair 차트 생성 함수
-def plot_chart(df, title, y_min=None, y_max=None):
+def plot_chart(df, title, y_min=None):
     if df.empty:
         return alt.Chart(pd.DataFrame({"date": [], "value": []})).mark_line().properties(title=title)
     chart = (
@@ -41,13 +41,7 @@ def plot_chart(df, title, y_min=None, y_max=None):
         .mark_line()
         .encode(
             x="date:T",
-            y=alt.Y(
-                "value:Q",
-                scale=alt.Scale(
-                    domainMin=y_min if y_min is not None else alt.Undefined,
-                    domainMax=y_max if y_max is not None else alt.Undefined
-                )
-            ),
+            y=alt.Y("value:Q", scale=alt.Scale(domainMin=y_min) if y_min is not None else alt.Undefined),
             tooltip=["date:T", "value:Q"]
         )
         .properties(title=title, width=500, height=250)
@@ -66,25 +60,30 @@ if st.button("🔄 Generate"):
 
     col1, col2 = st.columns(2)
     with col1:
-        st.markdown("#### 🇺🇸 Fed Funds Upper (3년)")
         df_fed = fred_timeseries("DFEDTARU", 3)
+        latest_fed = df_fed["value"].iloc[-1] if not df_fed.empty else None
+        st.markdown(f"#### 🇺🇸 Fed Funds Upper (3년): {latest_fed:.2f}%" if latest_fed else "#### 🇺🇸 Fed Funds Upper (3년)")
         st.altair_chart(plot_chart(df_fed, "Fed Funds Target Range"))
 
-        st.markdown("#### 🇰🇷 한국 3Y KTB 수익률 (2년)")
         df_kr3y = fred_timeseries("IR3TIB01KRM156N", 2)
+        latest_kr3y = df_kr3y["value"].iloc[-1] if not df_kr3y.empty else None
+        st.markdown(f"#### 🇰🇷 한국 3Y KTB 수익률 (2년): {latest_kr3y:.2f}%" if latest_kr3y else "#### 🇰🇷 한국 3Y KTB 수익률 (2년)")
         st.altair_chart(plot_chart(df_kr3y, "KTB 3Y Yield", y_min=2.0))
 
-        st.markdown("#### 💱 DXY 달러지수 (1년)")
         df_dxy = fred_timeseries("DTWEXBGS", 1)
+        latest_dxy = df_dxy["value"].iloc[-1] if not df_dxy.empty else None
+        st.markdown(f"#### 💱 DXY 달러지수 (1년): {latest_dxy:.2f}" if latest_dxy else "#### 💱 DXY 달러지수 (1년)")
         st.altair_chart(plot_chart(df_dxy, "DXY Dollar Index", y_min=80))
 
     with col2:
-        st.markdown("#### 🇺🇸 미국 2Y 수익률 (2년)")
         df_us2y = fred_timeseries("DGS2", 2)
+        latest_us2y = df_us2y["value"].iloc[-1] if not df_us2y.empty else None
+        st.markdown(f"#### 🇺🇸 미국 2Y 수익률 (2년): {latest_us2y:.2f}%" if latest_us2y else "#### 🇺🇸 미국 2Y 수익률 (2년)")
         st.altair_chart(plot_chart(df_us2y, "US 2Y Treasury Yield", y_min=2.5))
 
-        st.markdown("#### 📉 CBOE VIX 지수 (1년)")
         df_vix = fred_timeseries("VIXCLS", 1)
+        latest_vix = df_vix["value"].iloc[-1] if not df_vix.empty else None
+        st.markdown(f"#### 📉 CBOE VIX 지수 (1년): {latest_vix:.2f}" if latest_vix else "#### 📉 CBOE VIX 지수 (1년)")
         st.altair_chart(plot_chart(df_vix, "CBOE VIX Index"))
 
     # 💶 원/유로 관련
@@ -92,15 +91,18 @@ if st.button("🔄 Generate"):
 
     col3, col4 = st.columns(2)
     with col3:
-        st.markdown("#### 🇰🇷 한국 CPI (% YoY)")
         df_kr_cpi = fred_timeseries("FPCPITOTLZGKOR", 3)
-        st.altair_chart(plot_chart(df_kr_cpi, "Korea CPI (% YoY)", y_min=0))
+        latest_kr_cpi = df_kr_cpi["value"].iloc[-1] if not df_kr_cpi.empty else None
+        st.markdown(f"#### 🇰🇷 한국 CPI (% YoY): {latest_kr_cpi:.2f}" if latest_kr_cpi else "#### 🇰🇷 한국 CPI (% YoY)")
+        st.altair_chart(plot_chart(df_kr_cpi, "Korea CPI", y_min=80, y_max=140))
 
     with col4:
-        st.markdown("#### 🇪🇺 ECB 예치금리")
         df_ecb = fred_timeseries("ECBDFR", 3)
+        latest_ecb = df_ecb["value"].iloc[-1] if not df_ecb.empty else None
+        st.markdown(f"#### 🇪🇺 ECB 예치금리: {latest_ecb:.2f}%" if latest_ecb else "#### 🇪🇺 ECB 예치금리")
         st.altair_chart(plot_chart(df_ecb, "ECB Deposit Facility Rate"))
 
-        st.markdown("#### 🇪🇺 유로존 CPI (% YoY)")
         df_eu_cpi = fred_timeseries("CP0000EZ19M086NEST", 3)
-        st.altair_chart(plot_chart(df_eu_cpi, "Eurozone CPI (% YoY)", y_min=80, y_max=140))
+        latest_eu_cpi = df_eu_cpi["value"].iloc[-1] if not df_eu_cpi.empty else None
+        st.markdown(f"#### 🇪🇺 유로존 CPI (% YoY): {latest_eu_cpi:.2f}" if latest_eu_cpi else "#### 🇪🇺 유로존 CPI (% YoY)")
+        st.altair_chart(plot_chart(df_eu_cpi, "Eurozone CPI", y_min=80, y_max=140))
