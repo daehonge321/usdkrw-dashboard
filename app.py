@@ -7,7 +7,7 @@ import altair as alt
 # 🔑 FRED API 키
 FRED_KEY = "53718f3eaba1c258d6c6ae8836cf6911"
 
-# 📈 FRED 시계열 데이터 가져오기 (예외 처리 추가)
+# 📈 FRED 시계열 데이터 가져오기 (예외 처리 포함)
 @st.cache_data(ttl=3600)
 def fred_timeseries(series_id, years):
     end_date = datetime.today()
@@ -33,7 +33,7 @@ def fred_timeseries(series_id, years):
         return pd.DataFrame(columns=["date", "value"])
 
 # 📊 Altair 차트 생성 함수
-def plot_chart(df, title, y_min=None):
+def plot_chart(df, title, y_min=None, y_max=None):
     if df.empty:
         return alt.Chart(pd.DataFrame({"date": [], "value": []})).mark_line().properties(title=title)
     chart = (
@@ -41,7 +41,13 @@ def plot_chart(df, title, y_min=None):
         .mark_line()
         .encode(
             x="date:T",
-            y=alt.Y("value:Q", scale=alt.Scale(domainMin=y_min) if y_min is not None else alt.Undefined),
+            y=alt.Y(
+                "value:Q",
+                scale=alt.Scale(
+                    domainMin=y_min if y_min is not None else alt.Undefined,
+                    domainMax=y_max if y_max is not None else alt.Undefined
+                )
+            ),
             tooltip=["date:T", "value:Q"]
         )
         .properties(title=title, width=500, height=250)
@@ -86,16 +92,15 @@ if st.button("🔄 Generate"):
 
     col3, col4 = st.columns(2)
     with col3:
-        st.markdown("#### 🇰🇷 한국 CPI")
-        # ✅ 잘못된 시리즈 ID 수정: IRKRCPICQINMEI
-        df_kr_cpi = fred_timeseries("IRKRCPICQINMEI", 3)
-        st.altair_chart(plot_chart(df_kr_cpi, "Korea CPI"))
+        st.markdown("#### 🇰🇷 한국 CPI (% YoY)")
+        df_kr_cpi = fred_timeseries("FPCPITOTLZGKOR", 3)
+        st.altair_chart(plot_chart(df_kr_cpi, "Korea CPI (% YoY)", y_min=0))
 
     with col4:
         st.markdown("#### 🇪🇺 ECB 예치금리")
         df_ecb = fred_timeseries("ECBDFR", 3)
         st.altair_chart(plot_chart(df_ecb, "ECB Deposit Facility Rate"))
 
-        st.markdown("#### 🇪🇺 유로존 CPI")
+        st.markdown("#### 🇪🇺 유로존 CPI (% YoY)")
         df_eu_cpi = fred_timeseries("CP0000EZ19M086NEST", 3)
-        st.altair_chart(plot_chart(df_eu_cpi, "Eurozone CPI"))
+        st.altair_chart(plot_chart(df_eu_cpi, "Eurozone CPI (% YoY)", y_min=80, y_max=140))
