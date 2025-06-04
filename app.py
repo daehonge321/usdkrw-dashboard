@@ -26,12 +26,13 @@ def fred_timeseries(series_id, years):
 
 # 📊 Altair 차트 생성 함수
 def plot_chart(df, title, y_min=None):
+    y_scale = alt.Scale(domainMin=y_min) if y_min is not None else alt.Undefined
     chart = (
         alt.Chart(df)
         .mark_line()
         .encode(
             x="date:T",
-            y=alt.Y("value:Q", scale=alt.Scale(min=y_min) if y_min else alt.Undefined),
+            y=alt.Y("value:Q", scale=y_scale),
             tooltip=["date:T", "value:Q"]
         )
         .properties(title=title, width=500, height=250)
@@ -39,13 +40,13 @@ def plot_chart(df, title, y_min=None):
     )
     return chart
 
-# 🖥️ 앱 레이아웃 설정
-st.set_page_config(page_title="환율 매크로 대시보드", layout="wide")
-st.title("📊 환율 관련 실시간 매크로 대시보드")
+# 💅️ 앱 레이아웃 설정
+st.set_page_config(page_title="확율 매크로 대시보드", layout="wide")
+st.title("📊 확율 관련 실시간 매크로 대시보드")
 
 # 🔘 유저 버튼
 if st.button("🔄 Generate"):
-    # 📉 시계열 차트 섹션
+    # 📉 시계열 차트 세츠션
     st.subheader("📈 주요 매크로 지표 시계열")
 
     col1, col2 = st.columns(2)
