@@ -32,17 +32,12 @@ def fred_timeseries(series_id, years):
 def plot_chart(df, title, y_min=None, y_max=None):
     if df.empty:
         return alt.Chart(pd.DataFrame({"date": [], "value": []})).mark_line().properties(title=title)
-    y_scale = {}
-    if y_min is not None:
-        y_scale["domainMin"] = y_min
-    if y_max is not None:
-        y_scale["domainMax"] = y_max
     chart = (
         alt.Chart(df)
         .mark_line()
         .encode(
             x="date:T",
-            y=alt.Y("value:Q", scale=alt.Scale(**y_scale) if y_scale else alt.Undefined),
+            y=alt.Y("value:Q", scale=alt.Scale(domain=[y_min, y_max]) if y_min is not None and y_max is not None else alt.Undefined),
             tooltip=["date:T", "value:Q"]
         )
         .properties(title=title, width=500, height=250)
@@ -88,18 +83,18 @@ if st.button("🔄 Generate"):
     col3, col4 = st.columns(2)
     with col3:
         st.markdown("#### 🇰🇷 한국 CPI")
-        df_kr_cpi = fred_timeseries("KORCPIALLMINMEI", 3)
+        df_kr_cpi = fred_timeseries("FPCPITOTLZGKOR", 3)
         st.altair_chart(plot_chart(df_kr_cpi, "Korea CPI", y_min=80, y_max=140))
 
-        st.markdown("#### 📊 유로존 실업률")
+        st.markdown("#### 🇪🇺 유로존 실업률")
         df_eu_unemp = fred_timeseries("LRHUTTTTEZM156S", 3)
-        st.altair_chart(plot_chart(df_eu_unemp, "Eurozone Unemployment Rate"))
+        st.altair_chart(plot_chart(df_eu_unemp, "Eurozone Unemployment Rate", y_min=0, y_max=10))
 
     with col4:
         st.markdown("#### 🇪🇺 유로존 CPI")
         df_eu_cpi = fred_timeseries("CP0000EZ19M086NEST", 3)
         st.altair_chart(plot_chart(df_eu_cpi, "Eurozone CPI", y_min=80, y_max=140))
 
-        st.markdown("#### 💼 유로존 M2 통화량")
-        df_eu_m2 = fred_timeseries("MYAGM2EZM196N", 3)
-        st.altair_chart(plot_chart(df_eu_m2, "Euro Area M2 Money Supply"))
+        st.markdown("#### 🇪🇺 유로존 M2 통화량")
+        df_m2 = fred_timeseries("MYAGM2EZM196N", 3)
+        st.altair_chart(plot_chart(df_m2, "Eurozone M2 Money Supply"))
